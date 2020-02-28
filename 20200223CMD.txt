@@ -1,0 +1,8 @@
+server adress 25.38.7.99
+
+
+////////////////start a server/////////////
+"D:\UE4\UE_4.24\Engine\Binaries\Win64\UE4Editor.exe" "D:\UE4\FPSRPG\ProjectFPSRPG\ProjectFPSRPG.uproject" /Game/ThirdPersonCPP/Maps/ThirdPersonExampleMap?listen -server -log
+
+///////connect to server//////////
+"D:\UE4\UE_4.24\Engine\Binaries\Win64\UE4Editor.exe" "D:\UE4\FPSRPG\ProjectFPSRPG\ProjectFPSRPG.uproject" 25.38.7.99:7777 -game -log
