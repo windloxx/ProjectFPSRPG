@@ -2,8 +2,10 @@
 
 
 #include "PlatformTrigger.h"
-
 #include "Components/BoxComponent.h"
+
+
+#include "MovingPlatform.h"
 
 // Sets default values
 APlatformTrigger::APlatformTrigger()
@@ -15,6 +17,10 @@ APlatformTrigger::APlatformTrigger()
 	if (!ensure( TriggerVolume != nullptr )) return;
 
 	RootComponent = TriggerVolume;
+
+	//////////////////////////////Trigger Volume OverlapEventBinding////////////////////////////////////////////
+	TriggerVolume->OnComponentBeginOverlap.AddDynamic(this, &APlatformTrigger::OnOverlapBegin);
+	TriggerVolume->OnComponentEndOverlap.AddDynamic(this, &APlatformTrigger::OnOverlapEnd);
 
 }
 
@@ -32,3 +38,25 @@ void APlatformTrigger::Tick(float DeltaTime)
 
 }
 
+/////Trigger Volume OverlapFunctions////
+void APlatformTrigger::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Activated"));
+
+	for (AMovingPlatform* MovingPlatform : ActiveMovingPlatform)
+	{
+		if (!ensure(MovingPlatform != nullptr)) return;
+		MovingPlatform->AddActiveTrigger();
+	}
+}
+
+void APlatformTrigger::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Deactivated"));
+
+	for (AMovingPlatform* MovingPlatform : ActiveMovingPlatform)
+	{
+		if (!ensure(MovingPlatform != nullptr)) return;
+		MovingPlatform->RemoveActiveTrigger();
+	}
+}

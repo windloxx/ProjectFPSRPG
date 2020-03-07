@@ -24,10 +24,21 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite,Meta = (MakeEditWidget = true))
 	FVector TargetLocation;
+	/////////functions/////////
+	void AddActiveTrigger();
+	void RemoveActiveTrigger();
+
+private:
+
+	UPROPERTY(EditAnywhere)
+	TArray<class APlatformTrigger*> ActivePlatformTrigger;
 
 protected:
 	virtual void Tick(float DeltaTime) override;
 
 	FVector GloablTargetLocation;
 	FVector GloablStartLoacation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int ActiveTrigger = 0;
 };

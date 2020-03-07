@@ -3,6 +3,9 @@
 
 #include "MovingPlatform.h"
 
+
+#include "PlatformTrigger.h"
+
 AMovingPlatform::AMovingPlatform()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -29,24 +32,38 @@ void AMovingPlatform::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (HasAuthority())
+	if (ActiveTrigger > 0)
 	{
-		FVector Location = GetActorLocation();
-		float JourneyLength = (GloablTargetLocation - GloablStartLoacation).Size();
-		float JourneyTravelled = (Location - GloablStartLoacation).Size();
-
-		if (JourneyTravelled > JourneyLength)
+		if (HasAuthority())
 		{
-			FVector Swap = GloablStartLoacation;
-			GloablStartLoacation = GloablTargetLocation;
-			GloablTargetLocation = Swap;
+			FVector Location = GetActorLocation();
+			float JourneyLength = (GloablTargetLocation - GloablStartLoacation).Size();
+			float JourneyTravelled = (Location - GloablStartLoacation).Size();
+
+			if (JourneyTravelled > JourneyLength)
+			{
+				FVector Swap = GloablStartLoacation;
+				GloablStartLoacation = GloablTargetLocation;
+				GloablTargetLocation = Swap;
+			}
+
+			FVector Direction = (GloablTargetLocation - GloablStartLoacation).GetSafeNormal();
+			Location += Speed * DeltaTime * Direction;
+			SetActorLocation(Location);
+
 		}
-
-		FVector Direction = (GloablTargetLocation - GloablStartLoacation).GetSafeNormal();
-		Location += Speed * DeltaTime * Direction;
-		SetActorLocation(Location);
-
-	}
-	
+	}	
 }
 
+void AMovingPlatform::AddActiveTrigger()
+{
+	ActiveTrigger++;
+}
+
+void AMovingPlatform::RemoveActiveTrigger()
+{
+	if (ActiveTrigger > 0)
+	{
+		ActiveTrigger--;
+	}
+}
