@@ -5,6 +5,8 @@
 
 #include "Engine/Engine.h"
 
+#include "Blueprint/UserWidget.h"
+
 //void UFPSRPGGameInstance::Init()
 //{
 //	UE_LOG(LogTemp, Warning, TEXT("GameInstanceIni"));
@@ -12,7 +14,13 @@
 
 UFPSRPGGameInstance::UFPSRPGGameInstance(const FObjectInitializer & ObjectInitializer)
 {
-	UE_LOG(LogTemp, Warning, TEXT("GameInstanceIni"));
+
+	ConstructorHelpers::FClassFinder<UUserWidget> MainMenuBPClass(TEXT("/Game/UI/MenuSystem/WidgetBP/WBP_MainMenu"));
+	if (!ensure(MainMenuBPClass.Class != nullptr)) return;
+
+	MainMenuClass = MainMenuBPClass.Class;
+
+	UE_LOG(LogTemp, Warning, TEXT("MainMenuClass %s"),*MainMenuClass->GetName());
 }
 
 void UFPSRPGGameInstance::Host()

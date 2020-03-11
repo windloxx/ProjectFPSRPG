@@ -17,11 +17,17 @@ class PROJECTFPSRPG_API UFPSRPGGameInstance : public UGameInstance
 public:
 	UFPSRPGGameInstance(const FObjectInitializer & ObjectInitializer);
 
+
+
 	UFUNCTION(Exec)
 	void Host();
 
 	UFUNCTION(Exec)
 	void Join(const FString& Adress);
+
+private:
+
+	TSubclassOf<class UUserWidget>MainMenuClass;
 
 //public:
 //
