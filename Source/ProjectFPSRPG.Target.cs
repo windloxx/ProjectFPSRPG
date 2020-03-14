@@ -10,5 +10,7 @@ public class ProjectFPSRPGTarget : TargetRules
 		Type = TargetType.Game;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
 		ExtraModuleNames.Add("ProjectFPSRPG");
-	}
+        bUsesSteam = true;
+
+    }
 }

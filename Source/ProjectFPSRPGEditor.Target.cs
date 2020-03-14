@@ -10,5 +10,6 @@ public class ProjectFPSRPGEditorTarget : TargetRules
 		Type = TargetType.Editor;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
 		ExtraModuleNames.Add("ProjectFPSRPG");
-	}
+        bUsesSteam = true;
+    }
 }

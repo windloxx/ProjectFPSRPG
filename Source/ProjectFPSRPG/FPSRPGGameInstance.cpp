@@ -4,6 +4,7 @@
 #include "FPSRPGGameInstance.h"
 
 #include "Engine/Engine.h"
+#include "OnlineSubsystem.h"
 
 #include "Blueprint/UserWidget.h"
 
@@ -21,6 +22,25 @@ UFPSRPGGameInstance::UFPSRPGGameInstance(const FObjectInitializer & ObjectInitia
 	MainMenuClass = MainMenuBPClass.Class;
 
 	UE_LOG(LogTemp, Warning, TEXT("MainMenuClass %s"),*MainMenuClass->GetName());
+}
+
+void UFPSRPGGameInstance::LoadMenuWidget()
+{
+	if (!ensure(MainMenuClass != nullptr)) return;
+	UUserWidget* Menu = CreateWidget<UUserWidget>(this, MainMenuClass);
+
+	if (!ensure(Menu != nullptr)) return;
+	Menu->AddToViewport();
+
+	APlayerController* PlayerController = GetFirstLocalPlayerController();
+	
+	FInputModeUIOnly MenuInputMode;
+	MenuInputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	MenuInputMode.SetWidgetToFocus(Menu->TakeWidget());
+
+	if (!ensure(PlayerController != nullptr)) return;
+	PlayerController->SetInputMode(MenuInputMode);
+	PlayerController->bShowMouseCursor = true;
 }
 
 void UFPSRPGGameInstance::Host()
@@ -45,4 +65,18 @@ void UFPSRPGGameInstance::Join(const FString& Adress)
 	APlayerController* PlayerController = GetFirstLocalPlayerController();
 	if (!ensure(PlayerController != nullptr)) return;
 	PlayerController->ClientTravel(*Adress, TRAVEL_Absolute,true);
+}
+
+void UFPSRPGGameInstance::Init()
+{
+	IOnlineSubsystem * OnlineSubSystemPtr = IOnlineSubsystem::Get();
+	if (OnlineSubSystemPtr != NULL)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnlineSubSystemPtr %s"), *OnlineSubSystemPtr->GetSubsystemName().ToString());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("NoOnlineSubSystemPtr"));
+	}
+	
 }

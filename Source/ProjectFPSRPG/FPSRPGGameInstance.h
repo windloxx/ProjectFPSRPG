@@ -17,7 +17,8 @@ class PROJECTFPSRPG_API UFPSRPGGameInstance : public UGameInstance
 public:
 	UFPSRPGGameInstance(const FObjectInitializer & ObjectInitializer);
 
-
+	UFUNCTION(Exec,BlueprintCallable)
+	void LoadMenuWidget();
 
 	UFUNCTION(Exec)
 	void Host();
@@ -26,6 +27,8 @@ public:
 	void Join(const FString& Adress);
 
 private:
+
+	virtual void Init();
 
 	TSubclassOf<class UUserWidget>MainMenuClass;
 
