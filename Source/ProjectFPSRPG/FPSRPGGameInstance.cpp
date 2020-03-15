@@ -6,7 +6,7 @@
 #include "Engine/Engine.h"
 #include "OnlineSubsystem.h"
 #include "MenuSystem/WidgetBP/MainMenu.h"
-
+#include "MenuSystem/WidgetBP/InGameMenu.h"
 
 #include "Blueprint/UserWidget.h"
 
@@ -20,8 +20,11 @@ UFPSRPGGameInstance::UFPSRPGGameInstance(const FObjectInitializer & ObjectInitia
 
 	ConstructorHelpers::FClassFinder<UUserWidget> MainMenuBPClass(TEXT("/Game/UI/MenuSystem/WidgetBP/WBP_MainMenu"));
 	if (!ensure(MainMenuBPClass.Class != nullptr)) return;
-
 	MainMenuClass = MainMenuBPClass.Class;
+
+	ConstructorHelpers::FClassFinder<UUserWidget> InGameMenuBPClass(TEXT("/Game/UI/MenuSystem/WidgetBP/WBP_InGameMenu"));
+	if (!ensure(InGameMenuBPClass.Class != nullptr)) return;
+	InGameMenuClass = InGameMenuBPClass.Class;
 
 	UE_LOG(LogTemp, Warning, TEXT("MainMenuClass %s"),*MainMenuClass->GetName());
 }
@@ -34,6 +37,16 @@ void UFPSRPGGameInstance::LoadMenuWidget()
 	if (!ensure(Menu != nullptr)) return;
 	Menu->Setup();
 	Menu->SetMenuInterface(this);
+}
+
+void UFPSRPGGameInstance::LoadInGameMenuWidget()
+{
+	if (!ensure(InGameMenuClass != nullptr)) return;
+	InGameMenu = CreateWidget<UInGameMenu>(this, InGameMenuClass);
+
+	if (!ensure(InGameMenu != nullptr)) return;
+	InGameMenu->Setup();
+	InGameMenu->SetMenuInterface(this);
 }
 
 /////https://wiki.unrealengine.com/Logs,_Printing_Messages_To_Yourself_During_Runtime
