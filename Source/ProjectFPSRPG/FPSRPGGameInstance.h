@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "MenuSystem/WidgetBP/MenuInterface.h"
 #include "FPSRPGGameInstance.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECTFPSRPG_API UFPSRPGGameInstance : public UGameInstance
+class PROJECTFPSRPG_API UFPSRPGGameInstance : public UGameInstance,public IMenuInterface
 {
 	GENERATED_BODY()
 
@@ -31,6 +32,8 @@ private:
 	virtual void Init();
 
 	TSubclassOf<class UUserWidget>MainMenuClass;
+
+	class UMainMenu* Menu;
 
 //public:
 //

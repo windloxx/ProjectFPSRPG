@@ -5,6 +5,8 @@
 
 #include "Engine/Engine.h"
 #include "OnlineSubsystem.h"
+#include "MenuSystem/WidgetBP/MainMenu.h"
+
 
 #include "Blueprint/UserWidget.h"
 
@@ -27,25 +29,21 @@ UFPSRPGGameInstance::UFPSRPGGameInstance(const FObjectInitializer & ObjectInitia
 void UFPSRPGGameInstance::LoadMenuWidget()
 {
 	if (!ensure(MainMenuClass != nullptr)) return;
-	UUserWidget* Menu = CreateWidget<UUserWidget>(this, MainMenuClass);
+	Menu = CreateWidget<UMainMenu>(this, MainMenuClass);
 
 	if (!ensure(Menu != nullptr)) return;
-	Menu->AddToViewport();
-
-	APlayerController* PlayerController = GetFirstLocalPlayerController();
-	
-	FInputModeUIOnly MenuInputMode;
-	MenuInputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-	MenuInputMode.SetWidgetToFocus(Menu->TakeWidget());
-
-	if (!ensure(PlayerController != nullptr)) return;
-	PlayerController->SetInputMode(MenuInputMode);
-	PlayerController->bShowMouseCursor = true;
+	Menu->Setup();
+	Menu->SetMenuInterface(this);
 }
 
+/////https://wiki.unrealengine.com/Logs,_Printing_Messages_To_Yourself_During_Runtime
 void UFPSRPGGameInstance::Host()
 {
-/////https://wiki.unrealengine.com/Logs,_Printing_Messages_To_Yourself_During_Runtime
+	if (Menu != nullptr)
+	{
+		Menu->Teardown();
+	}
+
 	UEngine* Engine = GetEngine();
 	if (!ensure(Engine != nullptr)) return;
 	Engine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Hosting Server"));
@@ -58,6 +56,11 @@ void UFPSRPGGameInstance::Host()
 
 void UFPSRPGGameInstance::Join(const FString& Adress)
 {
+	if (Menu != nullptr)
+	{
+		Menu->Teardown();
+	}
+
 	UEngine* Engine = GetEngine();
 	if (!ensure(Engine != nullptr)) return;
 	Engine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Joining %s"),*Adress));
