@@ -21,6 +21,23 @@ public:
 
 	void Setup();
 
+	UFUNCTION()
+	void CancelInGameMenu();
+	UFUNCTION()
+	void OpenMainMenu();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundBase* InGameMenuActiveSound;
+
+protected:
+	virtual bool Initialize() override;
+
+
 private:
 	IMenuInterface* MenuInterfacePtr;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* InGameMenuCancelButton;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* InGameBackToMainMenuButton;
 };

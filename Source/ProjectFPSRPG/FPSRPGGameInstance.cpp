@@ -26,7 +26,7 @@ UFPSRPGGameInstance::UFPSRPGGameInstance(const FObjectInitializer & ObjectInitia
 	if (!ensure(InGameMenuBPClass.Class != nullptr)) return;
 	InGameMenuClass = InGameMenuBPClass.Class;
 
-	UE_LOG(LogTemp, Warning, TEXT("MainMenuClass %s"),*MainMenuClass->GetName());
+	//UE_LOG(LogTemp, Warning, TEXT("MainMenuClass %s"),*MainMenuClass->GetName());
 }
 
 void UFPSRPGGameInstance::LoadMenuWidget()
@@ -39,6 +39,8 @@ void UFPSRPGGameInstance::LoadMenuWidget()
 	Menu->SetMenuInterface(this);
 }
 
+
+
 void UFPSRPGGameInstance::LoadInGameMenuWidget()
 {
 	if (!ensure(InGameMenuClass != nullptr)) return;
@@ -48,6 +50,14 @@ void UFPSRPGGameInstance::LoadInGameMenuWidget()
 	InGameMenu->Setup();
 	InGameMenu->SetMenuInterface(this);
 }
+
+// void UFPSRPGGameInstance::CancelInGameMenuWidget()
+// {
+// 	if (InGameMenu != nullptr)
+// 	{
+// 		InGameMenu->CancelInGameMenu();
+// 	}
+// }
 
 /////https://wiki.unrealengine.com/Logs,_Printing_Messages_To_Yourself_During_Runtime
 void UFPSRPGGameInstance::Host()
@@ -81,6 +91,13 @@ void UFPSRPGGameInstance::Join(const FString& Adress)
 	APlayerController* PlayerController = GetFirstLocalPlayerController();
 	if (!ensure(PlayerController != nullptr)) return;
 	PlayerController->ClientTravel(*Adress, TRAVEL_Absolute,true);
+}
+
+void UFPSRPGGameInstance::BackToMainMenu()
+{
+	APlayerController* PlayerController = GetFirstLocalPlayerController();
+	if (!ensure(PlayerController != nullptr)) return;
+	PlayerController->ClientTravel("/Game/Maps/MainMenu/MainMenu", TRAVEL_Absolute, true);
 }
 
 void UFPSRPGGameInstance::Init()

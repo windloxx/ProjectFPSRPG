@@ -1,5 +1,5 @@
 server adress 25.38.7.99
-
+-ipconfig
 my ipv4 192.168.0.103
 
 ////////////////start a server/////////////
