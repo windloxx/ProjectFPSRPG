@@ -100,6 +100,13 @@ void UFPSRPGGameInstance::BackToMainMenu()
 	PlayerController->ClientTravel("/Game/Maps/MainMenu/MainMenu", TRAVEL_Absolute, true);
 }
 
+void UFPSRPGGameInstance::QuitTheGame()
+{
+	APlayerController* PlayerController = GetFirstLocalPlayerController();
+	if (!ensure(PlayerController != nullptr)) return;
+	PlayerController->ConsoleCommand("quit");
+}
+
 void UFPSRPGGameInstance::Init()
 {
 	IOnlineSubsystem * OnlineSubSystemPtr = IOnlineSubsystem::Get();

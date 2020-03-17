@@ -33,7 +33,11 @@ protected:
 	UFUNCTION()
 	void OpenMainMenu();
 	UFUNCTION()
+	void OpenQuitMenu();
+	UFUNCTION()
 	void ConfirmJoin();
+	UFUNCTION()
+	void MainMenuQuitGame();
 
 private:
 	UPROPERTY(meta = (BindWidget))
@@ -44,6 +48,12 @@ private:
 	class UButton* JoinCancelButton;
 	UPROPERTY(meta = (BindWidget))
 	class UButton* JoinMenuJoinButton;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* MenuConfirmQuitButton;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* MenuCancelQuitEnsureButton;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* MenuQuitGameButton;
 
 	UPROPERTY(meta = (BindWidget))
 	class UEditableTextBox* JoinIPAdressField;
@@ -55,6 +65,8 @@ private:
 	class UWidget* JoinMenu;
 	UPROPERTY(meta = (BindWidget))
 	class UWidget* MainMenu;
+	UPROPERTY(meta = (BindWidget))
+	class UWidget* QuitEnsureMenu;
 	
 	IMenuInterface* MenuInterfacePtr;
 };

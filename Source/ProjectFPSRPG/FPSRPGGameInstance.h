@@ -32,7 +32,10 @@ public:
 
 	UFUNCTION(Exec)
 	void BackToMainMenu() override;
-	
+
+	UFUNCTION(Exec)
+	void QuitTheGame() override;
+
 private:
 
 	virtual void Init();

@@ -23,7 +23,12 @@ bool UMainMenu::Initialize()
 	JoinMenuJoinButton->OnClicked.AddDynamic(this, &UMainMenu::ConfirmJoin);
 	if (!ensure(JoinCancelButton != nullptr)) return false;
 	JoinCancelButton->OnClicked.AddDynamic(this, &UMainMenu::OpenMainMenu);
-
+	if (!ensure(MenuConfirmQuitButton != nullptr)) return false;
+	MenuConfirmQuitButton->OnClicked.AddDynamic(this, &UMainMenu::MainMenuQuitGame);
+	if (!ensure(MenuCancelQuitEnsureButton != nullptr)) return false;
+	MenuCancelQuitEnsureButton->OnClicked.AddDynamic(this, &UMainMenu::OpenMainMenu);
+	if (!ensure(MenuQuitGameButton != nullptr)) return false;
+	MenuQuitGameButton->OnClicked.AddDynamic(this, &UMainMenu::OpenQuitMenu);
 
 	return true;
 }
@@ -78,6 +83,14 @@ void UMainMenu::ConfirmJoin()
 	}
 }
 
+void UMainMenu::MainMenuQuitGame()
+{
+	if (MenuInterfacePtr != nullptr)
+	{
+		MenuInterfacePtr->QuitTheGame();
+	}
+}
+
 void UMainMenu::HostServer()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Im gonna to host server!"));
@@ -99,4 +112,11 @@ void UMainMenu::OpenMainMenu()
 	if (!ensure(MenuSwitcher != nullptr)) return;
 	if (!ensure(MainMenu != nullptr)) return;
 	MenuSwitcher->SetActiveWidget(MainMenu);
+}
+
+void UMainMenu::OpenQuitMenu()
+{
+	if (!ensure(MenuSwitcher != nullptr)) return;
+	if (!ensure(QuitEnsureMenu != nullptr)) return;
+	MenuSwitcher->SetActiveWidget(QuitEnsureMenu);
 }

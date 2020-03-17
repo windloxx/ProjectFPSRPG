@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 
 #include "Components/Button.h"
+#include "Components/WidgetSwitcher.h"
 
 bool UInGameMenu::Initialize()
 {
@@ -17,7 +18,11 @@ bool UInGameMenu::Initialize()
 	if (!ensure(InGameMenuCancelButton != nullptr)) return false;
 	InGameMenuCancelButton->OnClicked.AddDynamic(this, &UInGameMenu::CancelInGameMenu);
 	if (!ensure(InGameBackToMainMenuButton != nullptr)) return false;
-	InGameBackToMainMenuButton->OnClicked.AddDynamic(this, &UInGameMenu::OpenMainMenu);
+	InGameBackToMainMenuButton->OnClicked.AddDynamic(this, &UInGameMenu::OpenInGameBackToMainMenuEnsure);
+	if (!ensure(InGameBackToMainMenuEnsureButton != nullptr)) return false;
+	InGameBackToMainMenuEnsureButton->OnClicked.AddDynamic(this, &UInGameMenu::OpenMainMenu);
+	if (!ensure(InGameBackToMainMenuCancelButton != nullptr)) return false;
+	InGameBackToMainMenuCancelButton->OnClicked.AddDynamic(this, &UInGameMenu::OpenInGameMenu);
 
 	return true;
 }
@@ -44,6 +49,20 @@ void UInGameMenu::OpenMainMenu()
 		CancelInGameMenu();
 		MenuInterfacePtr->BackToMainMenu();
 	}
+}
+
+void UInGameMenu::OpenInGameMenu()
+{
+	if (!ensure(InGameMenuSwitcher != nullptr)) return;
+	if (!ensure(InGameMenuOverLay != nullptr)) return;
+	InGameMenuSwitcher->SetActiveWidget(InGameMenuOverLay);
+}
+
+void UInGameMenu::OpenInGameBackToMainMenuEnsure()
+{
+	if (!ensure(InGameMenuSwitcher != nullptr)) return;
+	if (!ensure(InGameBackToMainMenuEnsure != nullptr)) return;
+	InGameMenuSwitcher->SetActiveWidget(InGameBackToMainMenuEnsure);
 }
 
 void UInGameMenu::SetMenuInterface(IMenuInterface* InMenuInterface)
