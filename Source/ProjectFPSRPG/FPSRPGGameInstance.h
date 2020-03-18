@@ -18,11 +18,30 @@ class PROJECTFPSRPG_API UFPSRPGGameInstance : public UGameInstance,public IMenuI
 public:
 	UFPSRPGGameInstance(const FObjectInitializer & ObjectInitializer);
 
+	//FText SessionName; ;
+
+	//UI function
 	UFUNCTION(Exec,BlueprintCallable)
 	void LoadMenuWidget();
-
 	UFUNCTION(Exec,BlueprintCallable)
 	void LoadInGameMenuWidget();
+	//Network function
+	/**
+*	Function to host a game!
+*
+*	@Param		UserID			User that started the request
+*	@Param		SessionName		Name of the Session
+*	@Param		bIsLAN			Is this is LAN Game?
+*	@Param		bIsPresence		"Is the Session to create a presence Session"
+*	@Param		MaxNumPlayers	        Number of Maximum allowed players on this "Session" (Server)
+*/
+	UFUNCTION(Exec)
+	void HostSession() override;
+	UFUNCTION()
+	void OnHostSessionComplete(FName InName, bool bInBool);
+	UFUNCTION()
+	void OnDestorySessionComplete(FName InName, bool bInBool);
+	//
 
 	UFUNCTION(Exec)
 	void Host() override;

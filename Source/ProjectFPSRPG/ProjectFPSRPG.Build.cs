@@ -8,9 +8,6 @@ public class ProjectFPSRPG : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay","UMG", "OnlineSubsystem", "OnlineSubsystemUtils","Steamworks","Networking" });
-        DynamicallyLoadedModuleNames.Add("OnlineSubsystemSteam");
-
-        PublicDependencyModuleNames.Add("OnlineSubsystem");
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay","UMG", "OnlineSubsystem" });
     }
 }

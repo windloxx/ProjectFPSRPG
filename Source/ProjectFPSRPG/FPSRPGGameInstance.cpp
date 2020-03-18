@@ -7,6 +7,8 @@
 #include "OnlineSubsystem.h"
 #include "MenuSystem/WidgetBP/MainMenu.h"
 #include "MenuSystem/WidgetBP/InGameMenu.h"
+#include "OnlineSessionSettings.h"
+#include "Interfaces/OnlineSessionInterface.h"
 
 #include "Blueprint/UserWidget.h"
 
@@ -49,6 +51,76 @@ void UFPSRPGGameInstance::LoadInGameMenuWidget()
 	if (!ensure(InGameMenu != nullptr)) return;
 	InGameMenu->Setup();
 	InGameMenu->SetMenuInterface(this);
+}
+
+void UFPSRPGGameInstance::HostSession()
+{
+
+	FName SessionName = TEXT("hello hi!");
+	IOnlineSubsystem * OnlineSubSystemPtr = IOnlineSubsystem::Get();
+	if (OnlineSubSystemPtr != NULL)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnlineSubSystemPtr %s"), *OnlineSubSystemPtr->GetSubsystemName().ToString());
+		IOnlineSessionPtr SessionInterface = OnlineSubSystemPtr->GetSessionInterface();
+		if (SessionInterface.IsValid())
+		{
+			auto ExistingSession = SessionInterface->GetNamedSession(SessionName);
+			if (ExistingSession == nullptr)
+			{
+				FOnlineSessionSettings SessionSettings;
+				SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UFPSRPGGameInstance::OnHostSessionComplete);
+				SessionInterface->CreateSession(0, SessionName, SessionSettings);
+			}
+			else
+			{
+				SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UFPSRPGGameInstance::OnDestorySessionComplete);
+				SessionInterface->DestroySession(SessionName);
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("NoOnlineSubSystemPtr"));
+	}
+}
+
+void UFPSRPGGameInstance::OnHostSessionComplete(FName InName, bool bInBool)
+{
+	if (bInBool)
+	{
+		if (Menu != nullptr)
+		{
+			Menu->Teardown();
+		}
+
+		UEngine* Engine = GetEngine();
+		if (!ensure(Engine != nullptr)) return;
+		Engine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Hosting Server"));
+
+		UWorld* World = GetWorld();
+		if (!ensure(World != nullptr)) return;
+
+		World->ServerTravel("/Game/ThirdPersonCPP/Maps/ThirdPersonExampleMap?listen");
+		UE_LOG(LogTemp, Warning, TEXT("Host Session Successed"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Host Session Failed"));
+	}
+	
+}
+
+void UFPSRPGGameInstance::OnDestorySessionComplete(FName InName, bool bInBool)
+{
+	if (bInBool)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Destory session successed"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Destory session Failed"));
+	}
+	
 }
 
 // void UFPSRPGGameInstance::CancelInGameMenuWidget()
@@ -113,6 +185,11 @@ void UFPSRPGGameInstance::Init()
 	if (OnlineSubSystemPtr != NULL)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("OnlineSubSystemPtr %s"), *OnlineSubSystemPtr->GetSubsystemName().ToString());
+		IOnlineSessionPtr SessionInterface = OnlineSubSystemPtr->GetSessionInterface();
+		if (SessionInterface.IsValid())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Found session interface"));
+		}
 	}
 	else
 	{

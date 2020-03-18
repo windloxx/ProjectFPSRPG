@@ -96,7 +96,7 @@ void UMainMenu::HostServer()
 	UE_LOG(LogTemp, Warning, TEXT("Im gonna to host server!"));
 	if (MenuInterfacePtr != nullptr)
 	{
-		MenuInterfacePtr->Host();
+		MenuInterfacePtr->HostSession();
 	}
 }
 
