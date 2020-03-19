@@ -41,6 +41,8 @@ public:
 	void OnHostSessionComplete(FName InName, bool bInBool);
 	UFUNCTION()
 	void OnDestorySessionComplete(FName InName, bool bInBool);
+	UFUNCTION()
+	void OnFindSessionComplete(bool bInBool);
 	//
 
 	UFUNCTION(Exec)
@@ -55,6 +57,7 @@ public:
 	UFUNCTION(Exec)
 	void QuitTheGame() override;
 
+	TSharedPtr <class FOnlineSessionSearch> SessionSearch;
 private:
 
 	virtual void Init();

@@ -69,6 +69,9 @@ void UFPSRPGGameInstance::HostSession()
 			{
 				FOnlineSessionSettings SessionSettings;
 				SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UFPSRPGGameInstance::OnHostSessionComplete);
+				SessionSettings.bIsLANMatch = true;
+				SessionSettings.bShouldAdvertise = true;
+				SessionSettings.NumPublicConnections = 2;
 				SessionInterface->CreateSession(0, SessionName, SessionSettings);
 			}
 			else
@@ -121,6 +124,23 @@ void UFPSRPGGameInstance::OnDestorySessionComplete(FName InName, bool bInBool)
 		UE_LOG(LogTemp, Warning, TEXT("Destory session Failed"));
 	}
 	
+}
+
+void UFPSRPGGameInstance::OnFindSessionComplete(bool bInBool)
+{
+	if (bInBool && SessionSearch != NULL)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Find session successed"));
+		for (FOnlineSessionSearchResult& SessionResult : SessionSearch->SearchResults)
+		{
+
+			UE_LOG(LogTemp, Warning, TEXT("Found Session ID: %s"), *SessionResult.GetSessionIdStr());
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Find session failed"));
+	}
 }
 
 // void UFPSRPGGameInstance::CancelInGameMenuWidget()
@@ -186,9 +206,14 @@ void UFPSRPGGameInstance::Init()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("OnlineSubSystemPtr %s"), *OnlineSubSystemPtr->GetSubsystemName().ToString());
 		IOnlineSessionPtr SessionInterface = OnlineSubSystemPtr->GetSessionInterface();
-		if (SessionInterface.IsValid())
+
+		SessionSearch = MakeShareable(new FOnlineSessionSearch());
+		if (SessionSearch.IsValid())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Found session interface"));
+			SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UFPSRPGGameInstance::OnFindSessionComplete);
+			SessionSearch->bIsLanQuery = true;
+			SessionInterface->FindSessions(0,SessionSearch.ToSharedRef());
+			UE_LOG(LogTemp, Warning, TEXT("Start Find a Session"));
 		}
 	}
 	else
