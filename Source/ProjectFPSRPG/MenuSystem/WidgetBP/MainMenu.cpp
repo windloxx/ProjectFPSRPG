@@ -3,9 +3,26 @@
 
 #include "MainMenu.h"
 
+#include "UObject/ConstructorHelpers.h"
+#include "ServerRow.h"
+
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
 #include "Components/EditableTextBox.h"
+#include "Components/ScrollBox.h"
+#include "Components/TextBlock.h"
+
+
+
+UMainMenu::UMainMenu(const FObjectInitializer & ObjectInitializer) :Super(ObjectInitializer)
+{
+	
+	ConstructorHelpers::FClassFinder<UUserWidget> SerRowBPClass (TEXT("/Game/UI/MenuSystem/WidgetBP/WBP_ServerScrollBoxComponent"));
+	if (!ensure(SerRowBPClass.Class != nullptr)) return;
+	ServerRowClass = SerRowBPClass.Class;
+
+	ConfirmJoin();
+}
 
 bool UMainMenu::Initialize()
 {
@@ -29,7 +46,10 @@ bool UMainMenu::Initialize()
 	MenuCancelQuitEnsureButton->OnClicked.AddDynamic(this, &UMainMenu::OpenMainMenu);
 	if (!ensure(MenuQuitGameButton != nullptr)) return false;
 	MenuQuitGameButton->OnClicked.AddDynamic(this, &UMainMenu::OpenQuitMenu);
-
+	if (!ensure(RefreshServerListButton != nullptr)) return false;
+	RefreshServerListButton->OnClicked.AddDynamic(this, &UMainMenu::MenuRefreshServerList);
+//
+	//JoinScrollBox->AddChild(CreateWidget<UScrollBoxChild>(this, CreateWidget<UScrollBoxChild>(this, ServerRowClass)));
 	return true;
 }
 
@@ -71,15 +91,55 @@ void UMainMenu::Teardown()
 	this->RemoveFromViewport();
 }
 
+void UMainMenu::MenuRefreshServerList()
+{
+	if (!ensure(MenuInterfacePtr != nullptr)) return;
+	MenuInterfacePtr->RefreshServerNames();
+}
+
+void UMainMenu::SetServerList(TArray<FString> ServerNames, bool ClickAble)
+{
+	UWorld* World = this->GetWorld();
+	if (!ensure(World != nullptr)) return;
+
+	ServerScrollBox->ClearChildren();
+	uint32 i = 0;
+	for (const FString& ServerName : ServerNames)
+	{
+		
+		UServerRow* Row = CreateWidget<UServerRow>(World, ServerRowClass);
+
+		if (!ensure(ServerScrollBox != nullptr)) return;
+		ServerScrollBox->AddChild(Row);
+
+		if (!ensure(Row != nullptr)) return;
+		Row->ServerName->SetText(FText::FromString(ServerName));
+		Row->SetBeSelectedIndex(i);
+		if (!ensure(MenuInterfacePtr != nullptr)) return;
+		Row->SetMenuInterFace(MenuInterfacePtr);
+		if (!ClickAble)
+		{
+			Row->SetVisibility(ESlateVisibility::HitTestInvisible);
+			
+		}
+		else
+		{
+			Row->SetVisibility(ESlateVisibility::Visible);
+		}
+		i++;
+	}
+	
+}
+
 void UMainMenu::ConfirmJoin()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Im gonna to Join server!"));
+	//UE_LOG(LogTemp, Warning, TEXT("Im gonna to Join server!"));
 	if (MenuInterfacePtr != nullptr)
 	{
-		if (!ensure(JoinIPAdressField != nullptr)) return;
-		const FString& IPAdress = JoinIPAdressField->GetText().ToString();
-		UE_LOG(LogTemp, Warning, TEXT("IP adress input is %s"), *IPAdress);
-		MenuInterfacePtr->Join(IPAdress);
+// 		if (!ensure(JoinIPAdressField != nullptr)) return;
+// 		const FString& IPAdress = JoinIPAdressField->GetText().ToString();
+// 		UE_LOG(LogTemp, Warning, TEXT("IP adress input is %s"), *IPAdress);
+		MenuInterfacePtr->Join("");
 	}
 }
 
@@ -105,6 +165,10 @@ void UMainMenu::OpenJoinMenu()
 	if (!ensure(MenuSwitcher != nullptr)) return;
 	if (!ensure(JoinMenu != nullptr)) return;
 	MenuSwitcher->SetActiveWidget(JoinMenu);
+	if (MenuInterfacePtr != nullptr)
+	{
+		MenuInterfacePtr->RefreshServerNames();
+	}
 }
 
 void UMainMenu::OpenMainMenu()

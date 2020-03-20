@@ -17,11 +17,22 @@ class PROJECTFPSRPG_API UMainMenu : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	UMainMenu(const FObjectInitializer & ObjectInitializer);
 	void SetMenuInterface(IMenuInterface* InMenuInterface);
 
 	void Setup();
 	void Teardown();
+
+	UFUNCTION()
+	void MenuRefreshServerList();
+
+	void SetServerList(TArray<FString> ServerNames,bool ClickAble = true);
 	
+	UPROPERTY(meta = (BindWidget))
+	class UPanelWidget* ServerScrollBox;
+
+	//class UScrollBoxChild* JoinScrollBoxChild;
+	TSubclassOf<class UUserWidget> ServerRowClass;
 		
 protected:
 	virtual bool Initialize() override;
@@ -54,9 +65,11 @@ private:
 	class UButton* MenuCancelQuitEnsureButton;
 	UPROPERTY(meta = (BindWidget))
 	class UButton* MenuQuitGameButton;
-
 	UPROPERTY(meta = (BindWidget))
-	class UEditableTextBox* JoinIPAdressField;
+	class UButton* RefreshServerListButton;
+	
+
+	
 
 	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher* MenuSwitcher;

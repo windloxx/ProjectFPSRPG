@@ -25,6 +25,8 @@ public:
 	void LoadMenuWidget();
 	UFUNCTION(Exec,BlueprintCallable)
 	void LoadInGameMenuWidget();
+// 	UFUNCTION(Exec,BlueprintCallable)
+// 	void LoadScrollBoxChildWidget();
 	//Network function
 	/**
 *	Function to host a game!
@@ -57,16 +59,27 @@ public:
 	UFUNCTION(Exec)
 	void QuitTheGame() override;
 
+	UFUNCTION(Exec)
+	void RefreshServerNames() override;
+	
+	void SetSelectedIndex(uint32 InIndex);
+
+	void StartFindSession();
+
 	TSharedPtr <class FOnlineSessionSearch> SessionSearch;
 private:
+
+	TOptional <uint32> SelectedIndex;
 
 	virtual void Init();
 
 	TSubclassOf<class UUserWidget>MainMenuClass;
 	TSubclassOf<class UUserWidget>InGameMenuClass;
+	/*TSubclassOf<class UUserWidget>ScrollBoxChildClass;*/
 
 	class UMainMenu* Menu;
 	class UInGameMenu* InGameMenu;
+	//class UScrollBoxChild* ScrollBoxChild;
 
 
 //public:

@@ -4,11 +4,14 @@
 #include "FPSRPGGameInstance.h"
 
 #include "Engine/Engine.h"
+#include "UObject/ConstructorHelpers.h"
 #include "OnlineSubsystem.h"
 #include "MenuSystem/WidgetBP/MainMenu.h"
 #include "MenuSystem/WidgetBP/InGameMenu.h"
+#include "MenuSystem/WidgetBP/ServerRow.h"
 #include "OnlineSessionSettings.h"
 #include "Interfaces/OnlineSessionInterface.h"
+#include "Components/ScrollBox.h"
 
 #include "Blueprint/UserWidget.h"
 
@@ -52,6 +55,19 @@ void UFPSRPGGameInstance::LoadInGameMenuWidget()
 	InGameMenu->Setup();
 	InGameMenu->SetMenuInterface(this);
 }
+
+// void UFPSRPGGameInstance::LoadScrollBoxChildWidget()
+// {
+// 	if (!ensure(ScrollBoxChildClass != nullptr)) return;
+// 	ScrollBoxChild = CreateWidget<UScrollBoxChild>(this, ScrollBoxChildClass);
+// 
+// 	if (!ensure(Menu != nullptr)) return;
+// 	if (!ensure(Menu->JoinScrollBox != nullptr)) return;
+// 
+// 	Menu->JoinScrollBox->AddChild(ScrollBoxChild);
+// 	
+// 	//to do t shared ref
+// }
 
 void UFPSRPGGameInstance::HostSession()
 {
@@ -128,14 +144,19 @@ void UFPSRPGGameInstance::OnDestorySessionComplete(FName InName, bool bInBool)
 
 void UFPSRPGGameInstance::OnFindSessionComplete(bool bInBool)
 {
-	if (bInBool && SessionSearch != NULL)
+	if (bInBool && SessionSearch != NULL && Menu!=nullptr)
 	{
+		TArray<FString> ServerNames;
+		
 		UE_LOG(LogTemp, Warning, TEXT("Find session successed"));
 		for (FOnlineSessionSearchResult& SessionResult : SessionSearch->SearchResults)
 		{
 
 			UE_LOG(LogTemp, Warning, TEXT("Found Session ID: %s"), *SessionResult.GetSessionIdStr());
+			ServerNames.Add(*SessionResult.GetSessionIdStr());
 		}
+		if (!ensure(Menu != nullptr)) return;
+		Menu->SetServerList(ServerNames);
 	}
 	else
 	{
@@ -171,18 +192,30 @@ void UFPSRPGGameInstance::Host()
 
 void UFPSRPGGameInstance::Join(const FString& Adress)
 {
-	if (Menu != nullptr)
+	if (SelectedIndex.IsSet())
 	{
-		Menu->Teardown();
+		UE_LOG(LogTemp, Warning, TEXT("Has seleted Index, Index is %d"), SelectedIndex.GetValue());
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Do not has seleted Index"));
+	}
+// 	if (Menu != nullptr)
+// 	{
+// 		Menu->SetServerList({ "Server1","Server2","Server3" });
+// 	}
+	//if (Menu != nullptr)
+	//{
+	//	Menu->Teardown();
+	//}
 
-	UEngine* Engine = GetEngine();
-	if (!ensure(Engine != nullptr)) return;
-	Engine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Joining %s"),*Adress));
+	//UEngine* Engine = GetEngine();
+	//if (!ensure(Engine != nullptr)) return;
+	//Engine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Joining %s"),*Adress));
 
-	APlayerController* PlayerController = GetFirstLocalPlayerController();
-	if (!ensure(PlayerController != nullptr)) return;
-	PlayerController->ClientTravel(*Adress, TRAVEL_Absolute,true);
+	//APlayerController* PlayerController = GetFirstLocalPlayerController();
+	//if (!ensure(PlayerController != nullptr)) return;
+	//PlayerController->ClientTravel(*Adress, TRAVEL_Absolute,true);
 }
 
 void UFPSRPGGameInstance::BackToMainMenu()
@@ -199,7 +232,17 @@ void UFPSRPGGameInstance::QuitTheGame()
 	PlayerController->ConsoleCommand("quit");
 }
 
-void UFPSRPGGameInstance::Init()
+void UFPSRPGGameInstance::RefreshServerNames()
+{
+	StartFindSession();
+}
+
+void UFPSRPGGameInstance::SetSelectedIndex(uint32 InIndex)
+{
+	SelectedIndex = InIndex;
+}
+
+void UFPSRPGGameInstance::StartFindSession()
 {
 	IOnlineSubsystem * OnlineSubSystemPtr = IOnlineSubsystem::Get();
 	if (OnlineSubSystemPtr != NULL)
@@ -212,13 +255,22 @@ void UFPSRPGGameInstance::Init()
 		{
 			SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UFPSRPGGameInstance::OnFindSessionComplete);
 			SessionSearch->bIsLanQuery = true;
-			SessionInterface->FindSessions(0,SessionSearch.ToSharedRef());
+			SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
 			UE_LOG(LogTemp, Warning, TEXT("Start Find a Session"));
 		}
+		if (!ensure(Menu != nullptr)) return;
+		Menu->SetServerList({"Searching Server..."},false);
+		SelectedIndex.Reset();
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("NoOnlineSubSystemPtr"));
 	}
+}
+
+void UFPSRPGGameInstance::Init()
+{
+	
+	
 	
 }

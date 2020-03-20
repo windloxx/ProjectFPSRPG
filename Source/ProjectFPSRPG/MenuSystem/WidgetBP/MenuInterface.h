@@ -27,4 +27,7 @@ public:
 	virtual void BackToMainMenu() = 0;
 	virtual void QuitTheGame() = 0;
 	virtual void HostSession() = 0;
+	virtual void RefreshServerNames() = 0;
+	virtual void SetSelectedIndex(uint32 InIndex) = 0;
+	/*virtual void LoadScrollBoxChildWidget() = 0;*/
 };
