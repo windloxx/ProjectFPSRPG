@@ -9,9 +9,10 @@
 #include "MenuSystem/WidgetBP/MainMenu.h"
 #include "MenuSystem/WidgetBP/InGameMenu.h"
 #include "MenuSystem/WidgetBP/ServerRow.h"
-#include "OnlineSessionSettings.h"
-#include "Interfaces/OnlineSessionInterface.h"
+//#include "OnlineSessionSettings.h"
+//#include "Interfaces/OnlineSessionInterface.h"
 #include "Components/ScrollBox.h"
+#include "Components/Button.h"
 
 #include "Blueprint/UserWidget.h"
 
@@ -77,24 +78,21 @@ void UFPSRPGGameInstance::HostSession()
 	if (OnlineSubSystemPtr != NULL)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("OnlineSubSystemPtr %s"), *OnlineSubSystemPtr->GetSubsystemName().ToString());
-		IOnlineSessionPtr SessionInterface = OnlineSubSystemPtr->GetSessionInterface();
+		SessionInterface = OnlineSubSystemPtr->GetSessionInterface();
 		if (SessionInterface.IsValid())
 		{
 			auto ExistingSession = SessionInterface->GetNamedSession(SessionName);
-			if (ExistingSession == nullptr)
-			{
-				FOnlineSessionSettings SessionSettings;
-				SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UFPSRPGGameInstance::OnHostSessionComplete);
-				SessionSettings.bIsLANMatch = true;
-				SessionSettings.bShouldAdvertise = true;
-				SessionSettings.NumPublicConnections = 2;
-				SessionInterface->CreateSession(0, SessionName, SessionSettings);
-			}
-			else
+			if (ExistingSession != nullptr)
 			{
 				SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UFPSRPGGameInstance::OnDestorySessionComplete);
 				SessionInterface->DestroySession(SessionName);
 			}
+			FOnlineSessionSettings SessionSettings;
+			SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UFPSRPGGameInstance::OnHostSessionComplete);
+			SessionSettings.bIsLANMatch = true;
+			SessionSettings.bShouldAdvertise = true;
+			SessionSettings.NumPublicConnections = 2;
+			SessionInterface->CreateSession(0, SessionName, SessionSettings);
 		}
 	}
 	else
@@ -147,7 +145,10 @@ void UFPSRPGGameInstance::OnFindSessionComplete(bool bInBool)
 	if (bInBool && SessionSearch != NULL && Menu!=nullptr)
 	{
 		TArray<FString> ServerNames;
-		
+
+		SearchResults.Empty();
+		this->SearchResults = SessionSearch->SearchResults;
+
 		UE_LOG(LogTemp, Warning, TEXT("Find session successed"));
 		for (FOnlineSessionSearchResult& SessionResult : SessionSearch->SearchResults)
 		{
@@ -163,6 +164,8 @@ void UFPSRPGGameInstance::OnFindSessionComplete(bool bInBool)
 		UE_LOG(LogTemp, Warning, TEXT("Find session failed"));
 	}
 }
+
+
 
 // void UFPSRPGGameInstance::CancelInGameMenuWidget()
 // {
@@ -192,30 +195,60 @@ void UFPSRPGGameInstance::Host()
 
 void UFPSRPGGameInstance::Join(const FString& Adress)
 {
-	if (SelectedIndex.IsSet())
+	if (SelectedIndex.IsSet() && SearchResults.IsValidIndex(SelectedIndex.GetValue()) && SessionInterface.IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Has seleted Index, Index is %d"), SelectedIndex.GetValue());
+		if (SearchResults[SelectedIndex.GetValue()].IsValid())
+		{
+			FOnlineSessionSearchResult& SearchResult = SearchResults[SelectedIndex.GetValue()];
+			UE_LOG(LogTemp, Warning, TEXT("Has seleted Index, Index is %d"), SelectedIndex.GetValue());
+			UE_LOG(LogTemp, Warning, TEXT("Has seleted Index, Name is %s"), *SearchResult.GetSessionIdStr());
+			SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UFPSRPGGameInstance::OnJoinSessionComplete);
+			SessionInterface->JoinSession(0, *SearchResult.GetSessionIdStr() , SearchResult);
+		}
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Do not has seleted Index"));
 	}
-// 	if (Menu != nullptr)
-// 	{
-// 		Menu->SetServerList({ "Server1","Server2","Server3" });
-// 	}
+
+}
+
+void UFPSRPGGameInstance::OnJoinSessionComplete(FName InName, EOnJoinSessionCompleteResult::Type Result)
+{
+	//if (Menu != nullptr)
+	//{
+	//	//Menu->SetServerList({ "Server1","Server2","Server3" });
+	//}
 	//if (Menu != nullptr)
 	//{
 	//	Menu->Teardown();
 	//}
+	if (!SessionInterface.IsValid())
+	{
+		return;
+	}
+	FString Adress;
+	if (SessionInterface->GetResolvedConnectString(InName, Adress))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("get adress successs"));
+		UEngine* Engine = GetEngine();
+		if (!ensure(Engine != nullptr)) return;
+		Engine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Joining %s"), *Adress));
 
-	//UEngine* Engine = GetEngine();
-	//if (!ensure(Engine != nullptr)) return;
-	//Engine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Joining %s"),*Adress));
+		APlayerController* PlayerController = GetFirstLocalPlayerController();
+		if (!ensure(PlayerController != nullptr)) return;
+		PlayerController->ClientTravel(*Adress, TRAVEL_Absolute, true);
+		
+		if (!ensure(Menu != nullptr)) return;
+		Menu->Teardown();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("get adress Failed"));
+	}
 
-	//APlayerController* PlayerController = GetFirstLocalPlayerController();
-	//if (!ensure(PlayerController != nullptr)) return;
-	//PlayerController->ClientTravel(*Adress, TRAVEL_Absolute,true);
+
+
 }
 
 void UFPSRPGGameInstance::BackToMainMenu()
@@ -239,7 +272,20 @@ void UFPSRPGGameInstance::RefreshServerNames()
 
 void UFPSRPGGameInstance::SetSelectedIndex(uint32 InIndex)
 {
+	if (!ensure(Menu != nullptr)) return;
 	SelectedIndex = InIndex;
+	for (UServerRow* Row : Menu->ServerRows)
+	{
+		if (!ensure(Row != nullptr)) return;
+		if (Row->BeSelectedIndex == InIndex)
+		{
+			Row->SetButtonStyle(false);
+		}
+		else
+		{
+			Row->SetButtonStyle(true);
+		}
+	}
 }
 
 void UFPSRPGGameInstance::StartFindSession()
@@ -248,7 +294,7 @@ void UFPSRPGGameInstance::StartFindSession()
 	if (OnlineSubSystemPtr != NULL)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("OnlineSubSystemPtr %s"), *OnlineSubSystemPtr->GetSubsystemName().ToString());
-		IOnlineSessionPtr SessionInterface = OnlineSubSystemPtr->GetSessionInterface();
+		SessionInterface = OnlineSubSystemPtr->GetSessionInterface();
 
 		SessionSearch = MakeShareable(new FOnlineSessionSearch());
 		if (SessionSearch.IsValid())

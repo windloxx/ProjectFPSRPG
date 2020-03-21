@@ -9,6 +9,7 @@
 #include "ServerRow.generated.h"
 
 
+
 /**
  * 
  */
@@ -24,7 +25,6 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UButton* ServerSelectButton;
 
-
 	UFUNCTION()
 	void OnServerButtonClicked();
 	
@@ -32,5 +32,9 @@ public:
 
 	void SetBeSelectedIndex(uint32 InIndex);
 	void SetMenuInterFace(IMenuInterface* InMenuInterface);
+	void SetUp(uint32 InIndex, FText InServerNameText, IMenuInterface* InMenuInterface);
+	void SetButtonStyle(bool Enable);
+
 	IMenuInterface* MenuInterfacePtr;
+
 };

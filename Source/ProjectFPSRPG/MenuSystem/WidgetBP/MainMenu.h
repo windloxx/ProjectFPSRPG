@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "MenuInterface.h"
+#include "ServerRow.h"
 
 #include "MainMenu.generated.h"
 
@@ -33,6 +34,8 @@ public:
 
 	//class UScrollBoxChild* JoinScrollBoxChild;
 	TSubclassOf<class UUserWidget> ServerRowClass;
+
+	TArray <UServerRow*> ServerRows;
 		
 protected:
 	virtual bool Initialize() override;

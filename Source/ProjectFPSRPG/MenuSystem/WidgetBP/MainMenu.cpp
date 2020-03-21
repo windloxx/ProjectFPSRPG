@@ -4,7 +4,6 @@
 #include "MainMenu.h"
 
 #include "UObject/ConstructorHelpers.h"
-#include "ServerRow.h"
 
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
@@ -101,7 +100,7 @@ void UMainMenu::SetServerList(TArray<FString> ServerNames, bool ClickAble)
 {
 	UWorld* World = this->GetWorld();
 	if (!ensure(World != nullptr)) return;
-
+	ServerRows.Empty();
 	ServerScrollBox->ClearChildren();
 	uint32 i = 0;
 	for (const FString& ServerName : ServerNames)
@@ -109,14 +108,17 @@ void UMainMenu::SetServerList(TArray<FString> ServerNames, bool ClickAble)
 		
 		UServerRow* Row = CreateWidget<UServerRow>(World, ServerRowClass);
 
+		ServerRows.AddUnique(Row);
+
 		if (!ensure(ServerScrollBox != nullptr)) return;
 		ServerScrollBox->AddChild(Row);
 
 		if (!ensure(Row != nullptr)) return;
-		Row->ServerName->SetText(FText::FromString(ServerName));
-		Row->SetBeSelectedIndex(i);
+		//Row->ServerName->SetText(FText::FromString(ServerName));
+		//Row->SetBeSelectedIndex(i);
 		if (!ensure(MenuInterfacePtr != nullptr)) return;
-		Row->SetMenuInterFace(MenuInterfacePtr);
+		Row->SetUp(i, FText::FromString(ServerName), MenuInterfacePtr);
+		//Row->SetMenuInterFace(MenuInterfacePtr);
 		if (!ClickAble)
 		{
 			Row->SetVisibility(ESlateVisibility::HitTestInvisible);

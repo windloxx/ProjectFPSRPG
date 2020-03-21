@@ -4,8 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+
+#include "OnlineSessionSettings.h"
+#include "Interfaces/OnlineSessionInterface.h"
+
 #include "MenuSystem/WidgetBP/MenuInterface.h"
 #include "FPSRPGGameInstance.generated.h"
+
 
 /**
  * 
@@ -45,6 +50,8 @@ public:
 	void OnDestorySessionComplete(FName InName, bool bInBool);
 	UFUNCTION()
 	void OnFindSessionComplete(bool bInBool);
+	
+	void OnJoinSessionComplete(FName InName,EOnJoinSessionCompleteResult::Type Result);
 	//
 
 	UFUNCTION(Exec)
@@ -67,9 +74,14 @@ public:
 	void StartFindSession();
 
 	TSharedPtr <class FOnlineSessionSearch> SessionSearch;
+
+	TArray<FOnlineSessionSearchResult> SearchResults;
+	
 private:
 
 	TOptional <uint32> SelectedIndex;
+
+	IOnlineSessionPtr SessionInterface;
 
 	virtual void Init();
 
